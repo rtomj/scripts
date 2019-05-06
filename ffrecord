@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+res=1920x1080
+fps=30
+quality=5
+codec=libx264
+pix_fmt=yuv420p
+pset=ultrafast
+ext=avi
+stamp=$(date +"%s-%m-%d-%Y")
+out=$stamp
+dest="$HOME/Videos"
+
+# best quality -- huge file size
+# ffmpeg -f x11grab -s $res -r $fps -i :0.0 -qscale 0 -vcodec huffyuv $dest/$out.$ext
+
+# good enough
+ffmpeg -f x11grab -video_size 1920x1080 -framerate $fps -i :0.0 \
+	-vcodec libx264 -preset ultrafast -qp 0 -pix_fmt yuv444p \
+	$dest/$out.$ext
