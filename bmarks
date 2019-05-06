@@ -1,0 +1,12 @@
+#!/bin/sh
+
+bookmarks="$HOME/.bmarks"
+# .bmarks format - second field set with addbmk:
+# https://github.com github
+
+goto=`cat "$bookmarks" | sed '/^$/d' | sort -n | awk '{print $2}' | dmenu -l 10 | xargs`
+url=`cat "$bookmarks" | grep "$goto" | awk '{print $1}' | xargs $BROWSER`
+
+# bug - if dmenu is exited, all urls are opened
+goto
+url

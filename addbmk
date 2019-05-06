@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# add url from clipboard to global bookmarks file
+xsel -b >> $HOME/.bmarks 
+dmenu | xargs | sed 's/^/ /' >> $HOME/.bmarks
