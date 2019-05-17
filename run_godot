@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# force godot to use opengl2 for old hardware
+LIBGL_ALWAYS_SOFTWARE=1 godot   
