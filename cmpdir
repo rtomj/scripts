@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+
+# cmpdir - compares two directories
+#
+# Bugs:
+#	 - only works for files in top level directory
+#	 - will compare test1/ and test1
+#	 - does not work with absolute path yet
+#	 - pretty slow and could be written better
+
+usage() {
+		echo "usage: cmpdir -sduUh [dir] [dir]"
+		echo ""
+		echo "s - list files with same name"
+		echo "d - list different files with same name"
+		echo "u - list unique files in directory not found in the other directory"
+		echo "U - list unique files in directory and files found with -d option"
+		#echo "r - list directories or search recursively?" #TODO
+		#echo "R - list directories or search recursively?" #TODO
+		echo "h - print usage"
+}
+
+createIndex() {
+		ls -1 "$1" > dir1
+		ls -1 "$2" > dir2
+}
+
+init() {
+		if [ "$3" ] ; then
+				D1="$2"
+				D2="$3"
+		else
+				D1="$1"
+				D2="$2"
+
+		fi
+
+		createIndex "$D1" "$D2" 2>/dev/null
+}
+
+sameNameFiles() {
+		d1=$(basename "$1")
+		d2=$(basename "$2")
+		
+		echo "===> Same Named Files:"
+		sameNames=($(sort dir1 dir2 | uniq -d))
+
+		for a in "${sameNames[@]}"
+		do
+				echo "$a"
+				dir1Files+=($(ls "$d1" | grep "$a"))
+				dir2Files+=($(ls "$d2" | grep "$a"))
+		done
+}
+
+diffFiles() {
+		d1=$(basename "$1")
+		d2=$(basename "$2")
+		
+		sameNames=($(sort dir1 dir2 | uniq -d))
+
+		for a in "${sameNames[@]}"
+		do
+				dir1Files+=($(ls "$d1" | grep "$a"))
+				dir2Files+=($(ls "$d2" | grep "$a"))
+		done
+
+		echo "===> Different Files With Same Name:"
+		d=0
+		while [ $d -lt ${#sameNames[*]} ]; do
+				if ! cmp -s "$d1"/"${dir1Files[$d]}" "$d2"/"${dir2Files[$d]}"; then
+						echo "$d1/${dir1Files[$d]}"
+						echo "$d2/${dir2Files[$d]}"
+				fi
+				d=$(( $d + 1 ));
+		done
+}
+
+printUnique() {
+		d1=$(basename "$1")
+		d2=$(basename "$2")
+		
+		missingFiles=($(sort dir1 dir2 | uniq -u))
+		for i in "${missingFiles[@]}"
+		do
+				ls "$d1" | grep "$i" >> d1miss
+				ls "$d2" | grep "$i" >> d2miss
+		done
+
+		echo "===> Directory $d1 contains unique file(s):"
+		cat d1miss
+		echo "===> Directory $d2 contains unique files(s):"
+		cat d2miss
+}
+
+cleanup() {
+		if [ -f dir1 ] || [ -f dir2 ] || [ -f d1miss ] || [ -f d2miss ]; then
+				rm dir1 2>/dev/null
+				rm dir2 2>/dev/null
+				rm d1miss 2>/dev/null
+				rm d2miss 2>/dev/null
+		fi
+}
+
+### Main Program
+init "$1" "$2" "$3"
+
+if [ -z "$D1" ] || [ -z "$D2" ] || [ ! -d "$D1" ] || [ ! -d "$D2" ] || [ "$D1" == "$D2" ]; then
+	usage
+	exit 1
+fi
+
+case "$1" in
+		-s*)
+				sameNameFiles "$D1" "$D2"
+				;;
+		-d*)
+				diffFiles "$D1" "$D2"
+		;;
+		-u*)
+				printUnique "$D1" "$D2"
+		;;
+		-U*)
+				printUnique "$D1" "$D2"
+				diffFiles "$D1" "$D2"
+		;;
+		-r*)
+		;;
+		-R*)
+		;;
+		-h*)
+				usage
+				;;
+		*)
+				sameNameFiles "$D1" "$D2"
+				diffFiles "$D1" "$D2"
+				printUnique "$D1" "$D2"
+		;;
+esac
+		
+cleanup
+
+
