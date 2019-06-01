@@ -2,7 +2,7 @@
 
 javac $1
 
-name=$(basename -s .java $1)
-echo Main-Class: $name > MANIFEST.MF
+prog=`basename $1 .`
+echo Main-Class: $prog > MANIFEST.MF
 
-jar -cvmf MANIFEST.MF $name.jar $name.class
+jar -cvmf MANIFEST.MF $prog.jar $prog.class
