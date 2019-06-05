@@ -1,0 +1,4 @@
+#!/bin/sh
+
+MIDIDEVICE=rmidi/0 lmms
+
