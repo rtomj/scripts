@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+	echo "vol: volume not changed"
+	mixerctl | grep master | head -n1
+else
+	mixerctl outputs.master=$1,$1
+fi
+
