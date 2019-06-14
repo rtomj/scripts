@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# get interface name
+# dladm show-link
+
+# bring interface up
+ifonfig [interface] plumb
+
+# verify
+# ifconfig -a
+
+# create secure object for password
+# dladm create-secobj -c wpa mykey
+
+# connect
+dladm connect-wifi -e ESSID -c wpa -k mykey
+
+# dhcp
+ifconfig [interface] dhcp
+
+# create /etc/hostname.interface ?
+# create /etc/resolv.conf -> nameserver dns
